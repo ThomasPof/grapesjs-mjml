@@ -15,7 +15,7 @@ export default (editor, opt = {}) => {
   });
 
   const getMjml = () => {
-    const mjml = opt.preMjml + editor.getHtml() + opt.postMjml;
+    const mjml = opt.preMjml + editor.getHtml().replaceAll(new RegExp(/ id="([^"]+)"/g),'') + opt.postMjml;
     return mjmlConvert(mjml, opt.fonts);
   };
 
@@ -74,7 +74,7 @@ export default (editor, opt = {}) => {
       modal.open();
 
       if (mjmlCode) {
-        mjmlCode.setContent(opt.preMjml + editor.getHtml() + opt.postMjml);
+        mjmlCode.setContent(opt.preMjml + editor.getHtml().replaceAll(new RegExp(/ id="([^"]+)"/g),'') + opt.postMjml);
         //mjmlCode.editor.setOption('lineWrapping', 1);
         mjmlCode.editor.refresh();
       }
