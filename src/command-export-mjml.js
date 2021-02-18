@@ -15,7 +15,7 @@ export default (editor, opt = {}) => {
   });
 
   const getMjml = () => {
-    const mjml = opt.preMjml + editor.getHtml() + opt.postMjml;
+    const mjml = opt.preMjml + editor.getHtml(opt) + opt.postMjml;
     return mjmlConvert(mjml, opt.fonts);
   };
 
@@ -66,29 +66,28 @@ export default (editor, opt = {}) => {
         container.appendChild(codeViewer.el);
       }
       if (!htmlCode) {
-        const codeViewer = this.buildEditor('HTML');
-        htmlCode = codeViewer.codeEditor;
-        container.appendChild(codeViewer.el);
+        // const codeViewer = this.buildEditor('HTML');
+        // htmlCode = codeViewer.codeEditor;
+        // container.appendChild(codeViewer.el);
       }
 
       modal.open();
 
       if (mjmlCode) {
-        mjmlCode.setContent(opt.preMjml + editor.getHtml() + opt.postMjml);
-        //mjmlCode.editor.setOption('lineWrapping', 1);
+        mjmlCode.setContent(opt.preMjml + editor.getHtml(opt) + opt.postMjml);
         mjmlCode.editor.refresh();
       }
 
       if (htmlCode) {
-        const mjml = getMjml();
-        if (mjml.errors.length) {
-          mjml.errors.forEach((err) => {
-            console.warn(err.formattedMessage);
-          });
-        }
-        htmlCode.setContent(mjml.html);
-        //htmlCode.editor.setOption('lineWrapping', 1);
-        htmlCode.editor.refresh();
+        // const mjml = getMjml();
+        // if (mjml.errors.length) {
+        //   mjml.errors.forEach((err) => {
+        //     console.warn(err.formattedMessage);
+        //   });
+        // }
+        // htmlCode.setContent(mjml.html);
+        // //htmlCode.editor.setOption('lineWrapping', 1);
+        // htmlCode.editor.refresh();
       }
 
       sender.set && sender.set('active', 0);

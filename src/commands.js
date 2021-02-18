@@ -9,7 +9,7 @@ export default (editor, opt = {}) => {
   cmd.add('mjml-import', importCommand(editor, opt));
   cmd.add('mjml-import:change', {
     run() {
-      const code = editor.getHtml();
+      const code = editor.getHtml(opt);
       return code.trim();
     }
   });
