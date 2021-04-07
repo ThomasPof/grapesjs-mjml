@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>GrapesJS Plugin</title>
+  <title>💌 Email builder</title>
   <link href="https://unpkg.com/grapesjs/dist/css/grapes.min.css" rel="stylesheet">
   <script src="https://unpkg.com/grapesjs"></script>
   <script src="dist/grapesjs-mjml.min.js"></script>
@@ -27,6 +27,13 @@
       background: transparent !important;
       box-shadow: none !important;
     }
+    .gjs-mdl-container-small .gjs-mdl-dialog {
+      max-width: 300px;
+    }
+
+    /* .gjs-dashed *[data-highlightable] {
+      padding: 10px 0px !important
+    } */
   </style>
 </head>
 
@@ -106,9 +113,9 @@
             <img class="item" src="https://source.unsplash.com/random/200x141" alt="Example image">
             <img class="item" src="https://source.unsplash.com/random/200x142" alt="Example image">
             <img class="item" src="https://source.unsplash.com/random/200x143" alt="Example image">
-            <img class="item" src="https://source.unsplash.com/random/200x144" alt="Example image"> 
+            <img class="item" src="https://source.unsplash.com/random/200x144" alt="Example image">
             <img class="item" src="https://source.unsplash.com/random/200x145" alt="Example image">
-            <img class="item" src="https://source.unsplash.com/random/200x146" alt="Example image">     
+            <img class="item" src="https://source.unsplash.com/random/200x146" alt="Example image">
           </div>
         </mj-raw>
         <!-- Icons -->
@@ -154,12 +161,138 @@
       storageManager: { autoload: 1, autosave: true},
       container: '#gjs',
       fromElement: true,
-
       plugins: ['grapesjs-mjml'],
       pluginsOpts: {
         'grapesjs-mjml': {}
       }
     });
+
+    // ADD SAVE/LOAD BUTTONS
+    var pnm = editor.Panels;
+    pnm.addButton('options', [
+      { id: 'save-database',
+        className: 'fa fa-floppy-o',
+        command: 'save-database',
+        attributes: {title: 'Save to database'}
+      },
+      { id: 'load-from-database',
+        className: 'fa fa-cloud-download',
+        command: 'load-from-database',
+        attributes: {title: 'Load from database'}
+      }
+    ])
+
+    // CREATE MODAL CONTENT BEFORE LOAD
+    const container = document.createElement('div');
+    const btnSave = document.createElement('button');
+    const btnImport = document.createElement('button');
+    const config = editor.getConfig();
+    const pfx = config.stylePrefix || '';
+    const input = document.createElement('input');
+    const select = document.createElement('select');
+    const inputContainer = document.createElement('div');
+    inputContainer.classList = "gjs-field";
+    input.type = "text";
+    input.setAttribute('name', 'template-name');
+    input.setAttribute('placeholder','Nom du template...');
+
+    select.setAttribute('name', 'template-names');
+
+    btnSave.innerHTML = 'Enregistrer le template';
+    btnImport.innerHTML = 'Importer ce template';
+    btnSave.className = `${pfx}btn-prim ${pfx}btn-import`;
+    btnImport.className = `${pfx}btn-prim ${pfx}btn-import`;
+    btnSave.onclick = () => {
+      let html = encodeURIComponent(editor.getHtml())
+      let name = encodeURIComponent(document.querySelector('[name=template-name]').value)
+
+      let params = "name="+name + "&html="+html;
+      var xhttp = new XMLHttpRequest();
+      xhttp.open("POST", "save.php", true);
+      xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          console.log(this.responseText);
+          editor.Modal.close();
+        }
+      };
+      xhttp.send(params);
+    };
+
+    btnImport.onclick = () => {
+      let name = document.querySelector('[name=template-names]').value;
+      let params = "template_name="+name;
+
+      var xhttp = new XMLHttpRequest();
+      xhttp.open("POST", "load.php", true);
+      xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          editor.DomComponents.getWrapper().set('content', '');
+          editor.setComponents(this.responseText);
+          input.value = name;
+          editor.Modal.close();
+          editor.runCommand('mjml-import:change');
+        }
+      };
+      xhttp.send(params);
+    };
+
+    // ADD FUNCTIONS TO BUTTONS
+    const cmdm = editor.Commands;
+    const modal = editor.Modal;
+    cmdm.add('save-database', {
+      run: function (em, sender) {
+        modal.setTitle('Sauvegarder le template');
+        container.innerHTML = '';
+        inputContainer.innerHTML = '';
+        inputContainer.appendChild(input);
+        container.appendChild(inputContainer);
+        container.appendChild(btnSave);
+        modal.setContent(container);
+        modal.open({
+          attributes: {
+            'class': "gjs-mdl-container-small",
+          }
+        });
+      },
+    }).add('load-from-database', {
+      run: function(em, sender) {
+        select.innerHTML = "";
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("POST", "load.php", true);
+        xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        xhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            console.log('reponse',JSON.parse(this.responseText));
+            let template_names = JSON.parse(this.responseText);
+            template_names.forEach(element => {
+              console.log(element)
+              let option = document.createElement('option');
+              option.value = element;
+              option.innerHTML = element;
+              select.appendChild(option)
+            });
+          }
+        };
+        xhttp.send();
+
+        modal.setTitle('Importer un template');
+        container.innerHTML = '';
+        inputContainer.innerHTML = '';
+        inputContainer.appendChild(select);
+        container.appendChild(inputContainer);
+        container.appendChild(btnImport);
+        modal.setContent(container);
+        modal.open({
+          attributes: {
+            'class': "gjs-mdl-container-small",
+          }
+        });
+      }
+    })
+
+
 
     window.editor = editor;
   </script>

@@ -27,7 +27,7 @@
   "author": "Artur Arseniev",
   "license": "BSD-3-Clause",
   "dependencies": {
-    "mjml-browser": "^4.8.1"
+    "mjml-browser": "^4.9.0"
   },
   "devDependencies": {
     "eslint": "^7.20.0",
