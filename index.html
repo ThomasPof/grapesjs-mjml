@@ -175,23 +175,41 @@
           var files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
           var formData = new FormData();
           for (var i in files) {
-            formData.append('file-' + i, files[i]) //containing all the selected images from local
+            formData.append('file-' + i, files[i])
           }
           var httpRequest = new XMLHttpRequest();
           httpRequest.open("POST", "/upload_image.php",true);
-          // httpRequest.setRequestHeader("Content-type","multipart/form‑data");
           httpRequest.send(formData);
           httpRequest.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
               var result = JSON.parse(this.responseText)
-              editor.AssetManager.add(result['data']); //adding images to asset
-              // manager of GrapesJS
+              editor.AssetManager.add(result['data']);
 
             }
           };
         },
       },
     });
+
+    // READ IMAGES IN /uploads/ FOLDER and write it in gjs-assets
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("GET", "read_uploads.php", true);
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        var result = JSON.parse(this.responseText)
+        var assets = []
+        result.forEach(image => {
+          let asset = {}
+          Object.keys(image).forEach(function (key) {
+            asset[key] = image[key]
+          });
+          console.log(image);
+          assets.push(asset)
+        });
+        localStorage.setItem('gjs-assets',JSON.stringify(assets))
+      }
+    };
+    xhttp.send()
 
     // ADD SAVE/LOAD BUTTONS
     var pnm = editor.Panels;
