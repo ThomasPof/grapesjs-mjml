@@ -192,10 +192,12 @@
     });
 
     // READ IMAGES IN /uploads/ FOLDER and write it in gjs-assets
+    const am = editor.AssetManager;
     var xhttp = new XMLHttpRequest();
     xhttp.open("GET", "read_uploads.php", true);
     xhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
+        console.log(this.responseText)
         var result = JSON.parse(this.responseText)
         var assets = []
         result.forEach(image => {
@@ -206,7 +208,8 @@
           console.log(image);
           assets.push(asset)
         });
-        localStorage.setItem('gjs-assets',JSON.stringify(assets))
+        // localStorage.setItem('gjs-assets',JSON.stringify(assets))
+        am.add(assets)
       }
     };
     xhttp.send()

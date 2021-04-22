@@ -9,7 +9,7 @@ $files = glob('uploads/*.{jpg,png,gif,jpeg}', GLOB_BRACE);
 
 $gjs_assets = array();
 foreach($files as $file) {
-
+	// print_r($actual_link.$file);
 	$image = array();
 	$image['type'] = "image";
 	$image['src'] = $actual_link.$file;
